@@ -1,4 +1,4 @@
-using BlazorIdentity.Client.Pages;
+using Blazored.SessionStorage;
 using BlazorIdentity.Components;
 using BlazorIdentity.Components.Account;
 using BlazorIdentity.Data;
@@ -17,6 +17,8 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddBlazoredSessionStorage();
 
 builder.Services.AddAuthentication(options =>
 	{
@@ -34,7 +36,10 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 	.AddEntityFrameworkStores<ApplicationDbContext>()
 	.AddSignInManager()
 	.AddDefaultTokenProviders();
-
+builder.Services.AddSignalR(hubOptions =>
+{
+	hubOptions.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10MB
+});
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();

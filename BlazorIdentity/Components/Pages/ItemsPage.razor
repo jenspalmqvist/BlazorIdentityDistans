@@ -1,0 +1,62 @@
+﻿@page "/items"
+@using Microsoft.AspNetCore.Authorization
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider StateProvider
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+@* Tvingar att man är inloggad för att komma åt den här sidan *@
+@attribute [Authorize]
+@rendermode InteractiveServer
+<h3>ItemsPage</h3>
+
+<InputText @bind-Value="@item.Name">@item.Name</InputText>
+<button @onclick="AddItemToUser">Add to user</button>
+<button @onclick="GoToConfirmation"></button>
+@code {
+	public Item item { get; set; } = new Item { Name = "", Price = 1 };
+	ApplicationUser? user;
+	AuthenticationState? authenticationState;
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// Vi hämtar ut det nuvarande autentiseringsStatet som innehåller information om användare som är inloggar
+			authenticationState = await StateProvider.GetAuthenticationStateAsync();
+			// Med hjälp av authenticationState.User kan vi hämta ut vår faktiskt ApplicationUser
+			var stateUser = await UserManager.GetUserAsync(authenticationState.User);
+			// Den kan vi sen använda för att hämta relaterad data från databasen
+			user = await UserService.GetUserItemsInfo(stateUser);
+		}
+	}
+	public async Task AddItemToUser()
+	{
+		if (user is not null)
+		{
+			user.Items.Add(item);
+			await UpdateUser();
+			item = new Item { Name = "", Price = 1 };
+		}
+	}
+
+	public async Task UpdateUser()
+	{
+		await UserService.UpdateUser(user);
+	}
+
+	public async Task GoToConfirmation()
+	{
+		// Gör om Items till ClientItems, annars blir det cirkelreferenser och vi kan inte lägga till det i sessionStorage
+		List<ClientItem> clientItems = user.Items.Select(i => new ClientItem { Name = i.Name, Quantity = i.Price }).ToList();
+		// Här lägger vi våra ClientItems i sessionStorage så vi kan hämta ut dem därifrån inne i Client
+		await sessionStorage.SetItemAsync(user.Id, clientItems);
+		NavigationManager.NavigateTo("/orderconfirmation");
+	}
+
+	class ClientItem
+	{
+		public string Name { get; set; }
+		public int Quantity { get; set; }
+	}
+}
