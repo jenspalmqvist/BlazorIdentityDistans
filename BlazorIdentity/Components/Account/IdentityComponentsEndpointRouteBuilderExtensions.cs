@@ -1,6 +1,6 @@
 using BlazorIdentity.Components.Account.Pages;
 using BlazorIdentity.Components.Account.Pages.Manage;
-using BlazorIdentity.Data;
+using BlazorIdentity.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -12,7 +12,7 @@ using System.Text.Json;
 
 namespace Microsoft.AspNetCore.Routing
 {
-	internal static class IdentityComponentsEndpointRouteBuilderExtensions
+    internal static class IdentityComponentsEndpointRouteBuilderExtensions
 	{
 		// These endpoints are required by the Identity Razor components defined in the /Components/Account/Pages directory of this project.
 		public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)

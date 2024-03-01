@@ -1,8 +1,6 @@
-﻿using BlazorIdentity.Data;
-
-namespace BlazorIdentity.Models
+﻿namespace BlazorIdentity.Models
 {
-	public class Item
+    public class Item
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }

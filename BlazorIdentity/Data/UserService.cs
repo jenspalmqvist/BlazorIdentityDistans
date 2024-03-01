@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BlazorIdentity.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlazorIdentity.Data
 {
-	public class UserService
+    public class UserService
 	{
 		private readonly ApplicationDbContext _context;
 

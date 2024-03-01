@@ -1,9 +1,11 @@
 ﻿@page "/items"
+@using BlazorIdentity.Client.Models
 @using Microsoft.AspNetCore.Authorization
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider StateProvider
 @inject UserService UserService
 @inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
 @* Tvingar att man är inloggad för att komma åt den här sidan *@
@@ -11,23 +13,40 @@
 @rendermode InteractiveServer
 <h3>ItemsPage</h3>
 
+
+
+
 <InputText @bind-Value="@item.Name">@item.Name</InputText>
+<p>@exchangeRate</p>
+
 <button @onclick="AddItemToUser">Add to user</button>
-<button @onclick="GoToConfirmation"></button>
+<button @onclick="GoToConfirmation">Go to confirmation</button>
 @code {
 	public Item item { get; set; } = new Item { Name = "", Price = 1 };
+	public float exchangeRate = 1;
+	string fromCurrency = "USD";
+	string toCurrency = "EUR";
 	ApplicationUser? user;
 	AuthenticationState? authenticationState;
+
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
 			// Vi hämtar ut det nuvarande autentiseringsStatet som innehåller information om användare som är inloggar
 			authenticationState = await StateProvider.GetAuthenticationStateAsync();
+
 			// Med hjälp av authenticationState.User kan vi hämta ut vår faktiskt ApplicationUser
 			var stateUser = await UserManager.GetUserAsync(authenticationState.User);
+
 			// Den kan vi sen använda för att hämta relaterad data från databasen
 			user = await UserService.GetUserItemsInfo(stateUser);
+
+			HttpClient.DefaultRequestHeaders.Add("X-Api-Key", "zBHK/0niL00SbbXY68qt4w==Wu29rq1TsPyjw6Cr");
+			var response = await HttpClient.GetFromJsonAsync<ResponseType>($"https://api.api-ninjas.com/v1/exchangerate?pair={fromCurrency}_{toCurrency}");
+			exchangeRate = response.exchange_rate;
+
+			StateHasChanged();
 		}
 	}
 	public async Task AddItemToUser()
@@ -48,15 +67,17 @@
 	public async Task GoToConfirmation()
 	{
 		// Gör om Items till ClientItems, annars blir det cirkelreferenser och vi kan inte lägga till det i sessionStorage
-		List<ClientItem> clientItems = user.Items.Select(i => new ClientItem { Name = i.Name, Quantity = i.Price }).ToList();
+		List<ClientItem> clientItems = user.Items.Select(i => new ClientItem { Name = i.Name, Price = i.Price }).ToList();
 		// Här lägger vi våra ClientItems i sessionStorage så vi kan hämta ut dem därifrån inne i Client
 		await sessionStorage.SetItemAsync(user.Id, clientItems);
 		NavigationManager.NavigateTo("/orderconfirmation");
 	}
 
-	class ClientItem
+	class ResponseType
 	{
-		public string Name { get; set; }
-		public int Quantity { get; set; }
+
+		public string currency_pair { get; set; }
+		public float exchange_rate { get; set; }
+
 	}
 }

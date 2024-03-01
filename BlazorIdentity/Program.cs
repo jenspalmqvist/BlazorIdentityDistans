@@ -2,6 +2,7 @@ using Blazored.SessionStorage;
 using BlazorIdentity.Components;
 using BlazorIdentity.Components.Account;
 using BlazorIdentity.Data;
+using BlazorIdentity.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<HttpClient>();
 builder.Services.AddBlazoredSessionStorage();
 
 builder.Services.AddAuthentication(options =>

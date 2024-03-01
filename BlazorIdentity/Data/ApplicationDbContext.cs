@@ -4,8 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlazorIdentity.Data
 {
-	public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+		: IdentityDbContext<ApplicationUser>(options)
 	{
-		DbSet<Item> Items { get; set; }
+		public DbSet<Item> Items { get; set; }
 	}
 }
